@@ -1,8 +1,8 @@
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Employee {
 	
@@ -16,6 +16,7 @@ public class Employee {
 	{
 		System.out.println("Enter id");
 		this.id=sc.nextInt();
+		
 		System.out.println("Enter First name:");
 		this.fname=sc.next();
 		System.out.println("Enter Last name:");
@@ -49,71 +50,123 @@ public class Employee {
 		
 		checkEmail();
 		checkPhoneNo();
+				
+	}
+	
+	public void getEmployee()
+	{
+		System.out.println();
 		
+		System.out.println("...............................");
+		System.out.println("Employee Id:"+this.id);
+		
+		System.out.println("First name: "+this.fname);
+		
+		System.out.println("Last name: "+this.lname);
+		
+		System.out.println("Gender: "+this.gender);
+		
+		System.out.println("Phone No : "+this.phoneNo);
+		
+		System.out.println("Email Id : "+this.email);
+		
+		System.out.println("Education: "+this.education);
+		
+		System.out.println("Address : "+this.address);
+		
+		System.out.println("Aadhar no : "+this.adharno);
+		
+		System.out.println("Nationality :"+this.nationality);
+		
+		System.out.println("DOB : "+this.dob);
+		
+		System.out.println("Joining date : "+this.jdate);
+		
+		System.out.println("Department id: "+this.deptId);
+		
+		System.out.println("Position : "+this.position);
+		
+		System.out.println("Branch : "+this.branch);
+		
+		System.out.println("Experience : "+this.experience);
+		
+		System.out.println("Salary : INR "+this.salary);
+		System.out.println();
+		System.out.println("...............................");
 			
+	}
+	
+	public void setEmployeeFromDB(ResultSet rs)
+	{
+	try 
+	{
+		this.id=rs.getInt(1);
+		this.fname=rs.getString(2);
+		this.lname=rs.getString(3);
+		this.jdate=rs.getString(4);
+		this.phoneNo=rs.getString(5);
+		this.email=rs.getString(6);
+		this.gender=rs.getString(7);
+		this.salary=rs.getDouble(8);
+		this.deptId=rs.getInt(9);
+		this.position=rs.getString(10);
+		this.branch=rs.getString(11);
+		this.dob=rs.getString(12);
+		this.education=rs.getString(13);
+		this.address=rs.getString(14);
+		this.experience=rs.getInt(15);
+		this.adharno=rs.getString(16);
+		this.nationality=rs.getString(17);
+		
+	} catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	
+	}
+
+	//for validation of phone number
+	public boolean phoneValidation(String no)
+	{
+		Pattern p=Pattern.compile("[7-9][0-9]{9}");
+		Matcher m=p.matcher(no);
+		
+		return (m.find() && m.group().equals(no));
+	}
+	
+	//for validating email id
+	public  boolean emailValidation(String email) 
+	{
+		Pattern p=Pattern.compile("^(.+)@(.+)com");
+		Matcher m=p.matcher(email);
+		
+		return(m.matches());
 	}
 	
 	public void checkEmail()
 	{
 		System.out.println("Enter email id:");
 		String emailId=sc.next();
-		if(Validation.emailValidation(emailId))
+		if(this.emailValidation(emailId))
 			this.email=emailId;
 		else
+		{
+			System.out.println("Enterd value is invalid");
 			checkEmail();
+		}
 	}
 	
 	public void checkPhoneNo()
 	{
 		System.out.println("Enter Phone number:");
 		String no=sc.next();
-		if(Validation.phoneValidation(no))
+		if(this.phoneValidation(no))
 			this.phoneNo=no;
 		else
 			checkPhoneNo();
 	}
 	
-	//Add entry to database
-	public static boolean addEmployee()
-	{
-		try {
-		String sql="insert into employee_information values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-		PreparedStatement ps=DatabaseConnection.con.prepareStatement(sql);
-		Employee e=new Employee();
-		e.setEmployee();
-		ps.setInt(1, e.id);
-		ps.setString(2, e.fname);
-		ps.setString(3, e.lname);
-		ps.setString(4, e.jdate);
-		ps.setString(5, e.phoneNo);
-		ps.setString(6, e.email);
-		ps.setString(7, e.gender);
-		ps.setDouble(8, e.salary);
-		ps.setInt(9, e.deptId);
-		ps.setString(10, e.position);
-		ps.setString(11, e.branch);
-		ps.setString(12, e.dob);
-		ps.setString(13, e.education);
-		ps.setString(14, e.address);
-		ps.setInt(15, e.experience);
-		ps.setString(16, e.adharno);
-		ps.setString(17, e.nationality);
-		
-		boolean a=ps.execute();
-		Salary.setSalary();
-		
-		return a;
-		
-		}
-		catch (Exception e) 
-		{
-			e.printStackTrace();
-			return  true;
-		}
-		
-		
-		
-	}
+	
 	
 
 			
