@@ -1,3 +1,4 @@
+package com.Bean;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
@@ -7,44 +8,53 @@ import java.util.regex.Pattern;
 public class Employee {
 	
 	public int id,deptId,experience;
-	public String fname,lname,jdate,dob,position,branch,education,address,gender,adharno,nationality,email,phoneNo;
+	public String fname,lname,jdate,dob,role,branch,education,address,gender,adharno,nationality,email,phoneNo;
 	public double salary;
 	Scanner sc=new Scanner(System.in);
 	
 	//To set values for empolyee's Fields
 	public void setEmployee()
 	{
+		
 		System.out.println("Enter id");
 		this.id=sc.nextInt();
 		
-		System.out.println("Enter First name:");
-		this.fname=sc.next();
-		System.out.println("Enter Last name:");
-		this.lname=sc.next();
-		System.out.println("Enter Gender");
-		this.gender=sc.next();
+		checkFname();
+		
+		checkLname();
+		
+		checkGender();
+		
 		System.out.println("Enter Education");
 		this.education=sc.next();
+		
 		System.out.println("Enter address");
 		this.address=sc.next();
-		System.out.println("Enter adhar no");
-		this.adharno=sc.next();
+		
+		checkAdharNo();
+		
 		System.out.println("Enter nationality");
 		this.nationality=sc.next();
+		
 		System.out.println("DOB");
 		this.dob=sc.next();
+		
 		System.out.println("Enter Joining date:");
 		this.jdate=sc.next();
+		
 		System.out.println("enter department id");
 		this.deptId=sc.nextInt();
-		System.out.println("Enter position");
-		this.position=sc.next();
+		
+		System.out.println("Enter role");
+		this.role=sc.next();
+		
 		System.out.println("Enter branch");
 		sc.nextLine();
 		this.branch=sc.next();
 		
 		System.out.println("Enter experience");
 		this.experience=sc.nextInt();
+		
 		System.out.println("Enter  Salary");
 		this.salary=sc.nextDouble();
 		
@@ -84,7 +94,7 @@ public class Employee {
 		
 		System.out.println("Department id: "+this.deptId);
 		
-		System.out.println("Position : "+this.position);
+		System.out.println("Role : "+this.role);
 		
 		System.out.println("Branch : "+this.branch);
 		
@@ -109,7 +119,7 @@ public class Employee {
 		this.gender=rs.getString(7);
 		this.salary=rs.getDouble(8);
 		this.deptId=rs.getInt(9);
-		this.position=rs.getString(10);
+		this.role=rs.getString(10);
 		this.branch=rs.getString(11);
 		this.dob=rs.getString(12);
 		this.education=rs.getString(13);
@@ -143,6 +153,7 @@ public class Employee {
 		return(m.matches());
 	}
 	
+	//Check for email is valid and set the value.
 	public void checkEmail()
 	{
 		System.out.println("Enter email id:");
@@ -156,6 +167,7 @@ public class Employee {
 		}
 	}
 	
+	//Check for phone number is valid and set the value.
 	public void checkPhoneNo()
 	{
 		System.out.println("Enter Phone number:");
@@ -166,7 +178,79 @@ public class Employee {
 			checkPhoneNo();
 	}
 	
+	//For validating Strings which contains only Character value.
+	public boolean validateName(String name) 
+	{
+		String regex= "^[A-Z][A-Za-z]+";
+		Pattern p=Pattern.compile(regex);
+		Matcher m=p.matcher(name);
+		return m.matches();
+					
+	}
 	
+	//Check for First name and set value.
+	public void checkFname()
+	{
+		System.out.println("Enter First name:");
+		String name=sc.next();
+		if(this.validateName(name))
+			this.fname=name;
+		else
+		{
+			System.out.println("Invalid");
+			checkFname();
+		}
+			
+	}
+	
+	//Check for Last name and set value.
+	    public void checkLname()
+		{
+		System.out.println("Enter Last name:");
+		String name=sc.next();
+		if(this.validateName(name))
+			this.lname=name;
+		else
+		{
+			System.out.println("Invalid");
+			checkLname();
+		}
+		}
+		
+		
+	
+	//Check For Gender value.
+	public void checkGender()
+	{
+		System.out.println("Enter Gender");
+		String gender=sc.next();
+		if(gender.equalsIgnoreCase("Male") || gender.equalsIgnoreCase("Female") || gender.equalsIgnoreCase("Other"))
+			this.gender=gender;
+		else
+		{
+			System.out.println("Invalid Value \n Enter Again");
+			checkGender();
+		}
+			
+		
+	}
+	
+	
+	//Validating adhar no
+	public void checkAdharNo()
+	{
+		System.out.println("Enter Adhar Number:");
+		String no=sc.next();
+		
+		if(no.length()==12 && no.charAt(0)!='0')
+			this.adharno=no;
+		else
+		{
+			System.out.println("Invalid");
+			checkAdharNo();
+		}
+		
+	}
 	
 
 			

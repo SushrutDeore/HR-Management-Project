@@ -1,3 +1,5 @@
+package com.DAO;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -6,52 +8,42 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
 
+import com.Bean.Admin;
+import com.Bean.Employee;
+import com.Configuration.ConnectionConfiguration;
+
 public class DAOClass implements DAOInterface
 {
-	public  final String driver="com.mysql.jdbc.Driver";
-	public  final String url="jdbc:mysql://localhost:3306/hr_management_system";
-	public  Connection con=null;
+	private  Connection con=ConnectionConfiguration.connect();
 	
-	public void getConnection() //Establishing connection with database.
-	{
-		try
-		{
-		Scanner sc=new Scanner(System.in);
-		System.out.println("Enter the id");
-		String id=sc.next();
-		System.out.println("Enter the Password:");
-		String psw=sc.next();
-		Class.forName(this.driver);
-		this.con=DriverManager.getConnection(this.url,id,psw);
-		System.out.println("Connected successfully....");
-		}
-		catch (Exception e)
-		{
-		System.out.println("Error in Connection");
-		e.printStackTrace();
-		}	
-	}
-
 	
-	public void closeConnection() // Closing connection from database.
+	public Admin loginCredentials()
 	{
-		try
-		{
-		this.con.close();
+		String sql="select * from admin";
+		Admin admin=new Admin();
 		
-		System.out.println("Connection closed.....");
+		try
+		{
+			PreparedStatement ps=con.prepareStatement(sql);
+			ResultSet rs=ps.executeQuery();
+			while(rs.next())
+			{
+				admin.setId(rs.getInt(1));
+				admin.setPsw(rs.getString(2));
+			}
+			
 		}
 		catch (Exception e) {
-			System.out.println("Error while closing the connection");
-			
+			// TODO: handle exception
 			e.printStackTrace();
-		}		
-		
+		}
+		return admin;
 	}
 
 	
 	public boolean addEmployee() //Add new Entry to Employee_information table.
 	{
+		
 		try {
 			String sql="insert into employee_information values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 			PreparedStatement ps=this.con.prepareStatement(sql);
@@ -66,7 +58,7 @@ public class DAOClass implements DAOInterface
 			ps.setString(7, e.gender);
 			ps.setDouble(8, e.salary);
 			ps.setInt(9, e.deptId);
-			ps.setString(10, e.position);
+			ps.setString(10, e.role);
 			ps.setString(11, e.branch);
 			ps.setString(12, e.dob);
 			ps.setString(13, e.education);
@@ -94,7 +86,7 @@ public class DAOClass implements DAOInterface
 	public  void displayEmployeeContacts()
 	{
 		try {
-			Statement st=this.con.createStatement();
+			Statement st=con.createStatement();
 			String sql="select * from employee_information;";
 			ResultSet rs=st.executeQuery(sql);
 			while(rs.next())
@@ -120,7 +112,7 @@ public class DAOClass implements DAOInterface
 	public void displayDepartmentInfo() 
 	{
 		try {
-			Statement st=this.con.createStatement();
+			Statement st=con.createStatement();
 			String sql="select * from department";
 			ResultSet rs=st.executeQuery(sql);
 			System.out.println("Department Id "+"\t"+"Department name ");
@@ -145,7 +137,7 @@ public class DAOClass implements DAOInterface
 	public void displaySalaryInfo()
 	{
 		try {
-			Statement st=this.con.createStatement();
+			Statement st=con.createStatement();
 			String sql="select e.emp_id,emp_fname,emp_lname,salary from employee_information e inner join salary_details s on e.emp_id=s.emp_id;";
 			ResultSet rs=st.executeQuery(sql);
 			while(rs.next())
@@ -172,7 +164,7 @@ public class DAOClass implements DAOInterface
 		try
 		{
 			String sql="select emp_id from employee_information  order by emp_id desc limit 1";
-			PreparedStatement ps=this.con.prepareStatement(sql);
+			PreparedStatement ps=con.prepareStatement(sql);
 			ResultSet rs=ps.executeQuery();
 			while(rs.next())
 			{
@@ -201,11 +193,11 @@ public class DAOClass implements DAOInterface
 			
 		String sql="select emp_id,dept_id,salary from employee_information where emp_id=?";
 		
-		PreparedStatement ps=this.con.prepareStatement(sql);
+		PreparedStatement ps=con.prepareStatement(sql);
 		ps.setInt(1, index);
 		ResultSet rs=ps.executeQuery();
 		String query="insert into salary_details values(?,?,?)";
-		PreparedStatement ps2=this.con.prepareStatement(query);
+		PreparedStatement ps2=con.prepareStatement(query);
 		
 		while(rs.next())
 		{
@@ -233,7 +225,7 @@ public class DAOClass implements DAOInterface
 		String sql="delete ei,sd from salary_details sd inner join employee_information ei on ei.emp_id=sd.emp_id where ei.emp_id=?";
 		try
 		{
-			PreparedStatement ps=this.con.prepareStatement(sql);
+			PreparedStatement ps=con.prepareStatement(sql);
 			ps.setInt(1, empId);
 			boolean flag=ps.execute();
 			if(flag==false)
@@ -252,11 +244,12 @@ public class DAOClass implements DAOInterface
 	
 	public void searchEmpById(int empId) // Get Employee information of provided empID 
 	{
+		
 		Employee emp=new Employee();
 		String sql="select * from employee_information where emp_id=?";
 		try
 		{
-			PreparedStatement ps=this.con.prepareStatement(sql);
+			PreparedStatement ps=con.prepareStatement(sql);
 			ps.setInt(1, empId);
 			ResultSet rs=ps.executeQuery();
 			while(rs.next())
@@ -271,6 +264,72 @@ public class DAOClass implements DAOInterface
 		}
 		
 	}
+
+
+	
+	public void updateSalary(int empId, double Salary) 
+	{
+		String sql="update employee_information ei inner join salary_details sd on ei.emp_id=sd.emp_id  set ei.salary=?,sd.monthly_salary=? where ei.emp_id=?";
+		try
+		{
+			PreparedStatement ps=con.prepareStatement(sql);
+			ps.setDouble(1, Salary);
+			ps.setDouble(2, Salary);
+			ps.setInt(3, empId);
+			int a=ps.executeUpdate();
+			System.out.println(a+" Rows Updated");
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			System.out.println("Unable to update");
+		}
+	}
+	
+	public void listOfEmployeeFromDept(int deptId)
+	{
+		Employee e=new Employee();
+		String sql="select * from employee_information where dept_id=?;";
+		try
+		{
+			PreparedStatement ps=con.prepareStatement(sql);
+			ps.setInt(1, deptId);
+			ResultSet rs=ps.executeQuery();
+			while(rs.next())
+			{
+				e.setEmployeeFromDB(rs);
+				e.getEmployee();
+				
+			}
+			
+			
+		}
+		catch (Exception e1) {
+			// TODO: handle exception
+			System.out.println("Error");
+			e1.printStackTrace();
+		}
+	}
+
+	public void employeeCount(int deptId)
+	{
+		String sql="select department_name,count(*) from employee_information ei inner join department d on d.department_id=ei.dept_id where ei.dept_id=?";
+		try
+		{
+			PreparedStatement ps=con.prepareStatement(sql);
+			ps.setInt(1, deptId);
+			ResultSet rs=ps.executeQuery();
+			while(rs.next())
+			{
+			System.out.println(rs.getString(1)+"Department  has "+rs.getInt(2)+" Employee.");
+			}
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+	
 
 	
 }
